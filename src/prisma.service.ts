@@ -8,9 +8,9 @@ export class PrismaService implements OnModuleInit {
   constructor() {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { PrismaClient } = require('@prisma/client');
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
-    });
+    const connectionString = process.env.DATABASE_URL;
+    console.log('DATABASE_URL:', connectionString ? 'found' : 'NOT FOUND');
+    const adapter = new PrismaPg({ connectionString });
     this.client = new PrismaClient({ adapter });
   }
 
