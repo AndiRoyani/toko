@@ -3,6 +3,9 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class TransaksiService {
+  createManual(body: { bayar: number; total: number; kembalian: number; items: { barangId: number; qty: number; }[]; detail: { barangId: number; qty: number; hargaSatuan: number; subtotal: number; }[]; }) {
+      throw new Error('Method not implemented.');
+  }
   constructor(private prisma: PrismaService) {}
 
   findAll() {

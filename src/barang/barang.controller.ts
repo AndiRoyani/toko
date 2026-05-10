@@ -16,14 +16,30 @@ export class BarangController {
   }
 
   @Post()
-  create(@Body() body: { nama: string; harga: number; stok: number; kategoriId: number }) {
+  create(@Body() body: {
+    nama: string;
+    harga: number;
+    stok: number;
+    kategoriId: number;
+    satuanKecil?: string;
+    hargaSatuanKecil?: number;
+    jumlahPerSatuan?: number;
+  }) {
     return this.barangService.create(body);
   }
 
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { nama?: string; harga?: number; stok?: number; kategoriId?: number },
+    @Body() body: {
+      nama?: string;
+      harga?: number;
+      stok?: number;
+      kategoriId?: number;
+      satuanKecil?: string;
+      hargaSatuanKecil?: number;
+      jumlahPerSatuan?: number;
+    },
   ) {
     return this.barangService.update(id, body);
   }

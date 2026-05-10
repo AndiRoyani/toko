@@ -24,4 +24,15 @@ export class TransaksiController {
   create(@Body() body: { bayar: number; items: { barangId: number; qty: number }[] }) {
     return this.transaksiService.create(body);
   }
+
+  @Post('manual')
+    createManual(@Body() body: {
+    bayar: number
+    total: number
+    kembalian: number
+    items: { barangId: number; qty: number }[]
+    detail: { barangId: number; qty: number; hargaSatuan: number; subtotal: number }[]
+    }) {
+    return this.transaksiService.createManual(body)
+    }
 }
