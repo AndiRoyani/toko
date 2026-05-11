@@ -21,9 +21,10 @@ export class BarangController {
     harga: number;
     stok: number;
     kategoriId: number;
-    satuanKecil?: string;
-    hargaSatuanKecil?: number;
-    jumlahPerSatuan?: number;
+    satuanKecil?: string | null;
+    hargaSatuanKecil?: number | null;
+    jumlahPerSatuan?: number | null;
+    hargaPerKg?: number | null;
   }) {
     return this.barangService.create(body);
   }
@@ -36,9 +37,10 @@ export class BarangController {
       harga?: number;
       stok?: number;
       kategoriId?: number;
-      satuanKecil?: string;
-      hargaSatuanKecil?: number;
-      jumlahPerSatuan?: number;
+      satuanKecil?: string | null;
+      hargaSatuanKecil?: number | null;
+      jumlahPerSatuan?: number | null;
+      hargaPerKg?: number | null;
     },
   ) {
     return this.barangService.update(id, body);

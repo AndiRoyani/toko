@@ -13,18 +13,19 @@ model Kategori {
 }
 
 model Barang {
-  id              Int      @id @default(autoincrement())
-  nama            String
-  harga           Int
-  stok            Int      @default(0)
-  kategoriId      Int
-  satuanKecil     String?  
-  hargaSatuanKecil Int?    
-  jumlahPerSatuan Int?     
-  kategori        Kategori @relation(fields: [kategoriId], references: [id])
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  detailTransaksi DetailTransaksi[]
+  id               Int      @id @default(autoincrement())
+  nama             String
+  harga            Int
+  stok             Int      @default(0)
+  kategoriId       Int
+  satuanKecil      String?
+  hargaSatuanKecil Int?
+  jumlahPerSatuan  Int?
+  hargaPerKg       Int?
+  kategori         Kategori @relation(fields: [kategoriId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  detailTransaksi  DetailTransaksi[]
 }
 
 model Transaksi {
