@@ -3,9 +3,6 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class TransaksiService {
-  createManual(body: { bayar: number; total: number; kembalian: number; items: { barangId: number; qty: number; }[]; detail: { barangId: number; qty: number; hargaSatuan: number; subtotal: number; }[]; }) {
-      throw new Error('Method not implemented.');
-  }
   constructor(private prisma: PrismaService) {}
 
   findAll() {
@@ -32,40 +29,26 @@ export class TransaksiService {
     bayar: number;
     items: { barangId: number; qty: number }[];
   }) {
-    // Validasi stok dan hitung total
     let total = 0;
     const detailData: { barangId: number; qty: number; hargaSatuan: number; subtotal: number }[] = [];
 
     for (const item of data.items) {
-      const barang = await this.prisma.barang.findUnique({
-        where: { id: item.barangId },
-      });
-
+      const barang = await this.prisma.barang.findUnique({ where: { id: item.barangId } });
       if (!barang) throw new BadRequestException(`Barang id ${item.barangId} tidak ditemukan`);
       if (barang.stok < item.qty) throw new BadRequestException(`Stok ${barang.nama} tidak cukup`);
 
       const subtotal = barang.harga * item.qty;
       total += subtotal;
-
-      detailData.push({
-        barangId: item.barangId,
-        qty: item.qty,
-        hargaSatuan: barang.harga,
-        subtotal,
-      });
+      detailData.push({ barangId: item.barangId, qty: item.qty, hargaSatuan: barang.harga, subtotal });
     }
 
     if (data.bayar < total) throw new BadRequestException('Uang bayar kurang');
-
     const kembalian = data.bayar - total;
 
-    // Buat transaksi + kurangi stok dalam satu transaction
     return this.prisma.$transaction(async (tx) => {
       const transaksi = await tx.transaksi.create({
         data: {
-          total,
-          bayar: data.bayar,
-          kembalian,
+          total, bayar: data.bayar, kembalian,
           detail: { create: detailData },
         },
         include: { detail: { include: { barang: true } } },
@@ -76,6 +59,47 @@ export class TransaksiService {
           where: { id: item.barangId },
           data: { stok: { decrement: item.qty } },
         });
+      }
+
+      return transaksi;
+    });
+  }
+
+  async createManual(data: {
+    bayar: number;
+    total: number;
+    kembalian: number;
+    items: { barangId: number; qty: number }[];
+    detail: { barangId: number; qty: number; hargaSatuan: number; subtotal: number }[];
+  }) {
+    if (data.bayar < data.total) throw new BadRequestException('Uang bayar kurang');
+
+    return this.prisma.$transaction(async (tx: any) => {
+      const transaksi = await tx.transaksi.create({
+        data: {
+          total: data.total,
+          bayar: data.bayar,
+          kembalian: data.kembalian,
+          detail: {
+            create: data.detail.map(d => ({
+              barangId: d.barangId,
+              qty: d.qty,
+              hargaSatuan: d.hargaSatuan,
+              subtotal: d.subtotal,
+            }))
+          }
+        },
+        include: { detail: { include: { barang: true } } }
+      });
+
+      // Hanya kurangi stok untuk item bungkus
+      for (const item of data.items) {
+        if (item.qty > 0) {
+          await tx.barang.update({
+            where: { id: item.barangId },
+            data: { stok: { decrement: item.qty } }
+          });
+        }
       }
 
       return transaksi;
